@@ -53,7 +53,7 @@ void heart_rate_clear_contact_status_bit()
   current_heart_rate_data[0] &= ~HEART_RATE_FLAGS_T_SENSOR_CONTACT_STATUS;
 }
 
-bool heart_rate_send_hr_bulk(uint8_t meas_hr[], short index) {
+bool  heart_rate_send_hr_bulk(int meas_hr[], short index) {
   uint8_t data_index = 0;
   current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_MEAS_SIZE_BIT;
   current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_ENERGY_EXPENDED_STATUS_BIT;

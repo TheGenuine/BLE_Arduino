@@ -90,7 +90,7 @@ void heart_rate_clear_contact_status_bit(void);
  *  @param meas_hr Measured heart_rate to send.
  *  @return : True when the ACI command is successfully placed in the ACI command queue
   */
-bool heart_rate_send_hr_bulk(uint8_t meas_hr[], short index);
+bool heart_rate_send_hr_bulk(int meas_hr[], short index);
 
 /** @brief Function to send a heart rate measurement (8 bits).
  *  @param meas_hr Measured heart_rate to send.
