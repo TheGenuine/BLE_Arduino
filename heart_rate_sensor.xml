@@ -28,72 +28,6 @@
             <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
             <PeriodForProperties/>
         </Characteristic>
-        <Characteristic>
-            <Name>Manufacturer Name String</Name>
-            <Uuid>2a29</Uuid>
-            <DefaultValue>NordicSemiconductor</DefaultValue>
-            <UsePresentationFormat>1</UsePresentationFormat>
-            <UserDescription></UserDescription>
-            <MaxDataLength>20</MaxDataLength>
-            <AttributeLenType>1</AttributeLenType>
-            <ForceOpen>false</ForceOpen>
-            <Properties>
-                <WriteWithoutResponse>false</WriteWithoutResponse>
-                <Write>false</Write>
-                <Notify>false</Notify>
-                <Indicate>false</Indicate>
-                <Broadcast>false</Broadcast>
-            </Properties>
-            <SetPipe>true</SetPipe>
-            <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="25" NameSpace="01" Unit="0000"/>
-            <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
-            <PeriodForProperties/>
-        </Characteristic>
-        <Characteristic>
-            <Name>System ID</Name>
-            <Uuid>2a23</Uuid>
-            <DefaultValue>55AA55AA55AA55AA</DefaultValue>
-            <UsePresentationFormat>0</UsePresentationFormat>
-            <UserDescription></UserDescription>
-            <MaxDataLength>8</MaxDataLength>
-            <AttributeLenType>1</AttributeLenType>
-            <ForceOpen>false</ForceOpen>
-            <Properties>
-                <WriteWithoutResponse>false</WriteWithoutResponse>
-                <Write>false</Write>
-                <Notify>false</Notify>
-                <Indicate>false</Indicate>
-                <Broadcast>false</Broadcast>
-            </Properties>
-            <SetPipe>true</SetPipe>
-            <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="1" NameSpace="01" Unit="0000"/>
-            <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
-            <PeriodForProperties/>
-        </Characteristic>
-        <Characteristic>
-            <Name>Firmware Revision String</Name>
-            <Uuid>2a26</Uuid>
-            <DefaultValue>01.1</DefaultValue>
-            <UsePresentationFormat>1</UsePresentationFormat>
-            <UserDescription></UserDescription>
-            <MaxDataLength>4</MaxDataLength>
-            <AttributeLenType>1</AttributeLenType>
-            <ForceOpen>false</ForceOpen>
-            <Properties>
-                <WriteWithoutResponse>false</WriteWithoutResponse>
-                <Write>false</Write>
-                <Notify>false</Notify>
-                <Indicate>false</Indicate>
-                <Broadcast>false</Broadcast>
-            </Properties>
-            <SetPipe>true</SetPipe>
-            <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="25" NameSpace="01" Unit="0000"/>
-            <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
-            <PeriodForProperties/>
-        </Characteristic>
     </Service>
     <Service Type="local" PrimaryService="true">
         <Name>Heart Rate</Name>
@@ -159,41 +93,91 @@
                 <Broadcast>false</Broadcast>
             </Properties>
             <SetPipe>false</SetPipe>
-            <AckIsAuto>false</AckIsAuto>
+            <AckIsAuto>true</AckIsAuto>
             <PresentationFormatDescriptor Value="0000" Exponent="0" Format="1" NameSpace="01" Unit="0000"/>
             <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
             <PeriodForProperties/>
         </Characteristic>
     </Service>
     <Service Type="local" PrimaryService="true">
-        <Name>Battery</Name>
-        <Uuid>180f</Uuid>
+        <Name>ConnectionControl</Name>
+        <Uuid>1111</Uuid>
         <Characteristic>
-            <Name>Battery Level</Name>
-            <Uuid>2a19</Uuid>
-            <DefaultValue>64</DefaultValue>
-            <UsePresentationFormat>0</UsePresentationFormat>
+            <Name>ConnectionInterval</Name>
+            <Uuid>0029</Uuid>
+            <DefaultValue>1.25</DefaultValue>
+            <UsePresentationFormat>1</UsePresentationFormat>
+            <UserDescription></UserDescription>
+            <MaxDataLength>8</MaxDataLength>
+            <AttributeLenType>1</AttributeLenType>
+            <ForceOpen>false</ForceOpen>
+            <Properties>
+                <WriteWithoutResponse>false</WriteWithoutResponse>
+                <Write>true</Write>
+                <Notify>true</Notify>
+                <Indicate>false</Indicate>
+                <Broadcast>false</Broadcast>
+            </Properties>
+            <SetPipe>false</SetPipe>
+            <AckIsAuto>true</AckIsAuto>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="20" NameSpace="01" Unit="0000"/>
+            <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
+            <PeriodForProperties/>
+        </Characteristic>
+        <Characteristic>
+            <Name>SlaveLatency</Name>
+            <Uuid>1113</Uuid>
+            <DefaultValue>0</DefaultValue>
+            <UsePresentationFormat>1</UsePresentationFormat>
             <UserDescription></UserDescription>
             <MaxDataLength>1</MaxDataLength>
             <AttributeLenType>1</AttributeLenType>
             <ForceOpen>false</ForceOpen>
             <Properties>
                 <WriteWithoutResponse>false</WriteWithoutResponse>
-                <Write>false</Write>
+                <Write>true</Write>
                 <Notify>true</Notify>
                 <Indicate>false</Indicate>
                 <Broadcast>false</Broadcast>
             </Properties>
-            <SetPipe>true</SetPipe>
+            <SetPipe>false</SetPipe>
             <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="4" NameSpace="01" Unit="27AD"/>
-            <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
-            <PeriodForProperties/>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="4" NameSpace="01" Unit="0000"/>
+            <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
+            <PeriodForProperties>
+                <Read>60000</Read>
+                <Notify>60000</Notify>
+            </PeriodForProperties>
+        </Characteristic>
+        <Characteristic>
+            <Name>SamplingRate</Name>
+            <Uuid>1114</Uuid>
+            <DefaultValue>1</DefaultValue>
+            <UsePresentationFormat>1</UsePresentationFormat>
+            <UserDescription></UserDescription>
+            <MaxDataLength>4</MaxDataLength>
+            <AttributeLenType>1</AttributeLenType>
+            <ForceOpen>false</ForceOpen>
+            <Properties>
+                <WriteWithoutResponse>false</WriteWithoutResponse>
+                <Write>true</Write>
+                <Notify>true</Notify>
+                <Indicate>false</Indicate>
+                <Broadcast>false</Broadcast>
+            </Properties>
+            <SetPipe>false</SetPipe>
+            <AckIsAuto>true</AckIsAuto>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="8" NameSpace="01" Unit="0000"/>
+            <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
+            <PeriodForProperties>
+                <Read>60000</Read>
+                <Notify>60000</Notify>
+            </PeriodForProperties>
         </Characteristic>
     </Service>
     <Gapsettings>
-        <Name>Nordic HRM V1.0</Name>
-        <DeviceNameWriteLength>15</DeviceNameWriteLength>
+        <Name>TCD BLE Mote</Name>
+        <DeviceNameWriteLength>12</DeviceNameWriteLength>
         <LocalPipeOnDeviceName>false</LocalPipeOnDeviceName>
         <DeviceNameShortLength>0</DeviceNameShortLength>
         <Apperance>0340</Apperance>
