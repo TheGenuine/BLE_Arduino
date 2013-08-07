@@ -105,10 +105,10 @@
         <Characteristic>
             <Name>ConnectionInterval</Name>
             <Uuid>0029</Uuid>
-            <DefaultValue>1.25</DefaultValue>
+            <DefaultValue>6</DefaultValue>
             <UsePresentationFormat>1</UsePresentationFormat>
             <UserDescription></UserDescription>
-            <MaxDataLength>8</MaxDataLength>
+            <MaxDataLength>2</MaxDataLength>
             <AttributeLenType>1</AttributeLenType>
             <ForceOpen>false</ForceOpen>
             <Properties>
@@ -120,7 +120,7 @@
             </Properties>
             <SetPipe>false</SetPipe>
             <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="20" NameSpace="01" Unit="0000"/>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="5" NameSpace="01" Unit="0000"/>
             <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
             <PeriodForProperties>
                 <Read>60000</Read>
@@ -170,7 +170,7 @@
             </Properties>
             <SetPipe>false</SetPipe>
             <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="8" NameSpace="01" Unit="0000"/>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="8" NameSpace="01" Unit="2722"/>
             <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
             <PeriodForProperties>
                 <Read>60000</Read>
@@ -210,7 +210,6 @@
         <TimeoutMultipler>502</TimeoutMultipler>
         <ServiceToAdvertise>
             <Uuid>180d</Uuid>
-            <Uuid>1111</Uuid>
         </ServiceToAdvertise>
         <CustomAdTypes>
             <AdType index="1">
