@@ -121,8 +121,11 @@
             <SetPipe>false</SetPipe>
             <AckIsAuto>true</AckIsAuto>
             <PresentationFormatDescriptor Value="0000" Exponent="0" Format="20" NameSpace="01" Unit="0000"/>
-            <PeriodForReadingThisCharacteristic>0</PeriodForReadingThisCharacteristic>
-            <PeriodForProperties/>
+            <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
+            <PeriodForProperties>
+                <Read>60000</Read>
+                <Notify>60000</Notify>
+            </PeriodForProperties>
         </Characteristic>
         <Characteristic>
             <Name>SlaveLatency</Name>
@@ -207,6 +210,7 @@
         <TimeoutMultipler>502</TimeoutMultipler>
         <ServiceToAdvertise>
             <Uuid>180d</Uuid>
+            <Uuid>1111</Uuid>
         </ServiceToAdvertise>
         <CustomAdTypes>
             <AdType index="1">
