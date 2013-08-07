@@ -120,7 +120,7 @@
             </Properties>
             <SetPipe>false</SetPipe>
             <AckIsAuto>true</AckIsAuto>
-            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="5" NameSpace="01" Unit="0000"/>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="6" NameSpace="01" Unit="0000"/>
             <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
             <PeriodForProperties>
                 <Read>60000</Read>
