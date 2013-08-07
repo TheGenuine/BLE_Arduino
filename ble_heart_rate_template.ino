@@ -42,12 +42,12 @@ static hal_aci_data_t aci_cmd;
 
 static bool radio_ack_pending  = false;
 static bool timing_change_done = false;
-
+static bool timing_high = false;
 static uint8_t current_heart_rate_data[HR_MAX_PAYLOAD];
 
 const int analogInPin = I0; 
 
-int sensorValue = 60;
+int sensorValue = 200;
 
 void setup(void)
 { 
@@ -154,12 +154,23 @@ void aci_loop()
 				*/
 				Serial.println("Timing changed");
 				Serial.println(aci_evt->params.timing.conn_rf_interval, HEX);
+				
+				Serial.print("Connection interval: ");
+				Serial.println(aci_state.connection_interval);
+
+				Serial.print("slave_latency: ");
+				Serial.println(aci_state.slave_latency);
 				break;
 				
 			case ACI_EVT_CONNECTED:
 				radio_ack_pending  = false;
 				timing_change_done = false;
 				Serial.println("Evt Connected");
+				Serial.print("Connection interval: ");
+				Serial.println(aci_state.connection_interval);
+
+				Serial.print("slave_latency: ");
+				Serial.println(aci_state.slave_latency);
 				break;
 				
 				
@@ -180,7 +191,31 @@ void aci_loop()
 				*/
 				radio_ack_pending = false;
 				break;
- 
+	 	    case ACI_EVT_DATA_RECEIVED:
+		        Serial.print(F("DATA RECEIVED"));
+		        Serial.print(F("Pipe #: 0x"));
+		        Serial.println(aci_evt->params.data_received.rx_data.pipe_number, HEX);
+		        {
+		          int i=0;
+		          Serial.print(F(" Data(HEX) : "));
+		          for(i=0; i<aci_evt->len - 2; i++)
+		          {
+		            Serial.print(aci_evt->params.data_received.rx_data.aci_data[i], HEX);
+		            Serial.print(F(" "));
+		          }
+		        }
+		        Serial.println(F(""));
+		        lib_aci_send_ack(&aci_state, aci_evt->params.data_received.rx_data.pipe_number);
+		        Serial.println(F("Setting connection parameter"));
+		        if(timing_high) {
+			        lib_aci_change_timing(1250, 1250, 2, 600);
+					timing_high = false;
+		        } else {
+			        lib_aci_change_timing(625, 625, 0, 100);
+			        timing_high = true;
+		        }
+
+		        break; 
 			 case ACI_EVT_DISCONNECTED:       
 				/**
 				Advertise again if the advertising timed out.
@@ -222,12 +257,50 @@ void hook_for_resetting_energy_expended(void)
 }
 #endif
 
+
 boolean isBufferFull() {
 	return buffer_size() > 19;
 }
 
+boolean checkTransmissionCriteria() {
+	return isBufferFull();
+}
+
 boolean isChannelOpen() {
 	return lib_aci_is_pipe_available(&aci_state, PIPE_HEART_RATE_HEART_RATE_MEASUREMENT_TX) && (radio_ack_pending == false) && (timing_change_done == true);
+}
+
+void handleCommands() {
+}
+
+void analyseData() {
+
+}
+
+void sendData() {
+	heart_rate_set_support_contact_bit();
+	heart_rate_set_contact_status_bit();
+
+	// boolean success = heart_rate_send_hr_bulk(buffer, currentPos);
+	
+	uint8_t data_index = 0;
+	current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_MEAS_SIZE_BIT;
+	current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_ENERGY_EXPENDED_STATUS_BIT;
+	current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_RR_INTERVAL_SUPPORT_BIT;
+	data_index++;
+	while(data_index < HR_MAX_PAYLOAD && buffer_size() > 0) {
+		current_heart_rate_data[data_index] = buffer_pop();
+		data_index++;
+	}
+	Serial.print("Data Index - ");
+	Serial.println(data_index);
+	boolean success = lib_aci_send_data(PIPE_HEART_RATE_HEART_RATE_MEASUREMENT_TX, (uint8_t *)&current_heart_rate_data[0] ,data_index);
+	
+	Serial.print("Send Data - ");
+	Serial.println(success);
+	if(success) {
+		radio_ack_pending = true;
+	}
 }
 
 void loop()
@@ -242,44 +315,19 @@ void loop()
 		Serial.print(" @ ");
 		Serial.println(buffer_size());
 	} else {
-		Serial.println(F("Push failed!"));
+		Serial.println(F("Data buffering failed!"));
 	}
+
+	analyseData();
 
 	aci_loop();
 	
 	if (isChannelOpen())
 	{
 		Serial.println("Channel open");
-		if(isBufferFull()) {
-			
-			heart_rate_set_support_contact_bit();
-			heart_rate_set_contact_status_bit();
-
-			// boolean success = heart_rate_send_hr_bulk(buffer, currentPos);
-			
-			uint8_t data_index = 0;
-			current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_MEAS_SIZE_BIT;
-			current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_ENERGY_EXPENDED_STATUS_BIT;
-			current_heart_rate_data[data_index] &= ~HEART_RATE_FLAGS_RR_INTERVAL_SUPPORT_BIT;
-			data_index++;
-			while(data_index < HR_MAX_PAYLOAD && buffer_size() > 0) {
-				current_heart_rate_data[data_index] = buffer_pop();
-				data_index++;
-			}
-
-			Serial.print("Data Index - ");
-			Serial.println(data_index);
-
-			boolean success = lib_aci_send_data(PIPE_HEART_RATE_HEART_RATE_MEASUREMENT_TX,
-																		 (uint8_t *)&current_heart_rate_data[0] ,data_index);
-			
-			Serial.print("Send Data - ");
-			Serial.println(success);
-			if(success) {
-				radio_ack_pending = true;
-			}
-		} else {
-			Serial.println(" Buffer not full enough");
+		handleCommands();
+		if(checkTransmissionCriteria()) {
+			sendData();
 		}
 	}
 
