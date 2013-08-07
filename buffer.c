@@ -35,10 +35,28 @@ void buffer_init() {
 	list.count = 0;
 }
 
+int buffer_pop() {
+	element_t * bottom;
+	int result = -1;
+	bottom = list.bottom;
+
+	if (/*bottom && */list.count > 0) {
+		result = bottom->data;
+		list.bottom = bottom->next;
+		free(bottom);
+		list.count--;
+	}
+	return result;
+}
+
 int buffer_push(int input_data) {
 	element_t * element;
 	int data = input_data;
-	// int * data_pointer = &data;
+
+	if(list.count >= 50){
+		buffer_pop();
+	} 
+
 	/* calloc sets the "next" field to zero. */
 	element = (element_t *) malloc(sizeof(element_t));
 	element->data = data;
@@ -56,20 +74,6 @@ int buffer_push(int input_data) {
 	list.top = element;
 	list.count++;
 	return 1;
-}
-
-int buffer_pop() {
-	element_t * bottom;
-	int result = -1;
-	bottom = list.bottom;
-
-	if (/*bottom && */list.count > 0) {
-		result = bottom->data;
-		list.bottom = bottom->next;
-		free(bottom);
-		list.count--;
-	}
-	return result;
 }
 
 int buffer_size() {
