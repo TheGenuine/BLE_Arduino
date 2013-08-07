@@ -88,7 +88,7 @@ typedef struct aci_state_t
   
   uint8_t                       pipes_open_bitmap[PIPES_ARRAY_SIZE];    /* Bitmap -> pipes are open and can be used for sending data over the air */
   uint8_t                       pipes_closed_bitmap[PIPES_ARRAY_SIZE];  /* Bitmap -> pipes are closed and cannot be used for sending data over the air */
-  bool                          confirmation_pending;                   /* Attribute protocol Handle Value confirmation is pending for a Handle Value Indication
+  boolean                          confirmation_pending;                   /* Attribute protocol Handle Value confirmation is pending for a Handle Value Indication
                                                                         (ACK is pending for a TX_ACK pipe) on local GATT Server*/
   /* End : Variables that are valid only when in a connection */                                                                        
   
@@ -110,7 +110,7 @@ typedef struct aci_state_t
  *  @details This function shall be used to enable or disable the debug printing.
               Debug printing is disabled by default.
  */
-void lib_aci_debug_print(bool enable);
+void lib_aci_debug_print(boolean enable);
 
 /** @brief Initialization function.
  *  @details This function shall be used to initialize/reset ACI Library and also Resets the nRF8001 by togging the reset pin of the nRF8001. This function will reset 
@@ -143,18 +143,18 @@ uint16_t lib_aci_get_slave_latency(aci_state_t *aci_stat);
  *  @param pipe Pipe to check.
  *  @return True if the pipe is available, otherwise false.
  */
-bool lib_aci_is_pipe_available(aci_state_t *aci_stat, uint8_t pipe);
+boolean lib_aci_is_pipe_available(aci_state_t *aci_stat, uint8_t pipe);
 
 /** @brief Checks if a given pipe is closed.
  *  @param pipe Pipe to check.
  *  @return True if the pipe is closed, otherwise false.
  */
-bool lib_aci_is_pipe_closed(aci_state_t *aci_stat, uint8_t pipe);
+boolean lib_aci_is_pipe_closed(aci_state_t *aci_stat, uint8_t pipe);
 
 /** @brief Checks if the discovery operation is finished.
  *  @return True if the discovery is finished.
  */
-bool lib_aci_is_discovery_finished(aci_state_t *aci_stat);
+boolean lib_aci_is_discovery_finished(aci_state_t *aci_stat);
 
 
 
@@ -169,44 +169,44 @@ bool lib_aci_is_discovery_finished(aci_state_t *aci_stat);
  *  if advertising or disconnect if in a connection.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_sleep(void);
+boolean lib_aci_sleep(void);
 
 /** @brief Resets the radio.
  *  @details The function sends a @c BasebandReset command to the radio.  
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_radio_reset(void);
+boolean lib_aci_radio_reset(void);
 
 /** @brief Radio starts directed advertising to bonded device.
  *  @details The function sends a @c DirectedConnect command to the radio.  
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_direct_connect(void);
+boolean lib_aci_direct_connect(void);
 
 /** @brief Gets the radio's version.
  *  @details This function sends a @c GetDeviceVersion command.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_device_version(void);
+boolean lib_aci_device_version(void);
 
 /** @brief Gets the device address.
  *  @details This function sends a @c GetDeviceAddress command.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_get_address(void);
+boolean lib_aci_get_address(void);
 
 /** @brief Gets the temperature.
  *  @details This function sends a @c GetTemperature command. lib_aci
  *  calls the @ref lib_aci_transaction_finished_hook() function when the temperature is received.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_get_temperature(void);
+boolean lib_aci_get_temperature(void);
 
 /** @brief Gets the battery level.
  *  @details This function sends a @c GetBatteryLevel command. 
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_get_battery_level(void);
+boolean lib_aci_get_battery_level(void);
 
 //@}
 
@@ -219,7 +219,7 @@ bool lib_aci_get_battery_level(void);
  *  a @c CommandResponseEvent.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_wakeup(void);
+boolean lib_aci_wakeup(void);
 
 //@}
 
@@ -236,14 +236,14 @@ bool lib_aci_wakeup(void);
  *  @param enter_exit_test_mode Enter a Test mode, or exit Test mode.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_test(aci_test_mode_change_t enter_exit_test_mode);
+boolean lib_aci_test(aci_test_mode_change_t enter_exit_test_mode);
 
 /** @brief Sets the radio's TX power.
  *  @details This function sends a @c SetTxPower command.
  *  @param tx_power TX power to be used by the radio.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_set_tx_power(aci_device_output_power_t tx_power);
+boolean lib_aci_set_tx_power(aci_device_output_power_t tx_power);
 
 /** @brief Tries to connect to a peer device.
  *  @details This function sends a @c Connect command to the radio.
@@ -251,7 +251,7 @@ bool lib_aci_set_tx_power(aci_device_output_power_t tx_power);
  *  @param adv_interval Advertising interval (in multiple of 0.625&nbsp;ms).
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_connect(uint16_t run_timeout, uint16_t adv_interval);
+boolean lib_aci_connect(uint16_t run_timeout, uint16_t adv_interval);
 
 /** @brief Tries to bond with a peer device.
  *  @details This function sends a @c Bond command to the radio.
@@ -259,14 +259,14 @@ bool lib_aci_connect(uint16_t run_timeout, uint16_t adv_interval);
  *  @param adv_interval Advertising interval (in multiple of 0.625&nbsp;ms).
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_bond(uint16_t run_timeout, uint16_t adv_interval);
+boolean lib_aci_bond(uint16_t run_timeout, uint16_t adv_interval);
 
 /** @brief Disconnects from peer device.
  *  @details This function sends a @c Disconnect command to the radio.
  *  @param reason Reason for disconnecting.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_disconnect(aci_state_t *aci_stat, aci_disconnect_reason_t reason);
+boolean lib_aci_disconnect(aci_state_t *aci_stat, aci_disconnect_reason_t reason);
 
 /**@brief Sets Local Data.
  *  @details
@@ -278,7 +278,7 @@ bool lib_aci_disconnect(aci_state_t *aci_stat, aci_disconnect_reason_t reason);
  *  @param size Size of the data to set.
  *  @return True if the transaction is successfully initiated.
 */
-bool lib_aci_set_local_data(aci_state_t *aci_stat, uint8_t pipe, uint8_t *value, uint8_t size);
+boolean lib_aci_set_local_data(aci_state_t *aci_stat, uint8_t pipe, uint8_t *value, uint8_t size);
 
 /** @brief Sends Broadcast message to the radio.
  *  @details The Broadcast message starts advertisement procedure 
@@ -289,7 +289,7 @@ bool lib_aci_set_local_data(aci_state_t *aci_stat, uint8_t pipe, uint8_t *value,
  *  Valid values: 160 to 16384 (which corresponds to an interval from 100 ms to 10.24 s).
  *  @return True if the broadcast message is sent successfully to the radio. 
 */
-bool lib_aci_broadcast(const uint16_t timeout, const uint16_t adv_interval);
+boolean lib_aci_broadcast(const uint16_t timeout, const uint16_t adv_interval);
 
 /** @name Open Advertising Pipes.  */
 
@@ -302,7 +302,7 @@ bool lib_aci_broadcast(const uint16_t timeout, const uint16_t adv_interval);
  *  @param pipe The pipe that has to be placed in advertising service data.
  *  @return True if the Open Adv Pipe message is sent successfully to the radio. 
 */
-bool lib_aci_open_adv_pipe(const uint8_t pipe);
+boolean lib_aci_open_adv_pipe(const uint8_t pipe);
 
 
 /** @name Open Advertising Pipes  */
@@ -318,7 +318,7 @@ bool lib_aci_open_adv_pipe(const uint8_t pipe);
  *  TX_BROADCAST pipe data is to be placed in Advertising Service Data fields
  *  @return true if the Open Adv Pipe message was sent successfully to the radio. 
 */
-bool lib_aci_open_adv_pipes(const uint8_t * const adv_service_data_pipes);
+boolean lib_aci_open_adv_pipes(const uint8_t * const adv_service_data_pipes);
 
 
 //@}
@@ -331,21 +331,21 @@ bool lib_aci_open_adv_pipes(const uint8_t * const adv_service_data_pipes);
  *  @details This function sends a @c setApplicationLatency command. 
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_set_app_latency(uint16_t latency, aci_app_latency_mode_t latency_mode);
+boolean lib_aci_set_app_latency(uint16_t latency, aci_app_latency_mode_t latency_mode);
 
 /** @brief Opens a remote pipe.
  *  @details This function sends an @c OpenRemotePipe command.
  *  @param pipe Number of the pipe to open.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_open_remote_pipe(aci_state_t *aci_stat, uint8_t pipe);
+boolean lib_aci_open_remote_pipe(aci_state_t *aci_stat, uint8_t pipe);
 
 /** @brief Closes a remote pipe.
  *  @details This function sends an @c CloseRemotePipe command.
  *  @param pipe Pipe number to close.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_close_remote_pipe(aci_state_t *aci_stat, uint8_t pipe);
+boolean lib_aci_close_remote_pipe(aci_state_t *aci_stat, uint8_t pipe);
 
 /** @brief Sends data on a given pipe.
  *  @details This function sends a @c SendData command with application data to
@@ -356,7 +356,7 @@ bool lib_aci_close_remote_pipe(aci_state_t *aci_stat, uint8_t pipe);
  *  @param size Size of the data to send.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_send_data(uint8_t pipe, uint8_t *value, uint8_t size);
+boolean lib_aci_send_data(uint8_t pipe, uint8_t *value, uint8_t size);
 
 /** @brief Requests data from a given pipe.
  *  @details This function sends a @c RequestData command to the radio. This
@@ -366,7 +366,7 @@ bool lib_aci_send_data(uint8_t pipe, uint8_t *value, uint8_t size);
  *  @param pipe Pipe number on which the data is requested.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_request_data(aci_state_t *aci_stat, uint8_t pipe);
+boolean lib_aci_request_data(aci_state_t *aci_stat, uint8_t pipe);
 
 /** @brief Sends a L2CAP change connection parameters request.
  *  @details This function sends a @c ChangeTiming command to the radio.  This command triggers a "L2CAP change connection parameters" request 
@@ -381,7 +381,7 @@ bool lib_aci_request_data(aci_state_t *aci_stat, uint8_t pipe);
  *  @param timeout requested slave timeout, in multiple of 10&nbsp;ms.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_change_timing(uint16_t minimun_cx_interval, uint16_t maximum_cx_interval, uint16_t slave_latency, uint16_t timeout);
+boolean lib_aci_change_timing(uint16_t minimun_cx_interval, uint16_t maximum_cx_interval, uint16_t slave_latency, uint16_t timeout);
 
 /** @brief Sends a L2CAP change connection parameters request with the connection predefined preffered connection parameters.
  *  @details This function sends a @c ChangeTiming command to the radio. This command triggers a "L2CAP change connection parameters" request 
@@ -394,7 +394,7 @@ bool lib_aci_change_timing(uint16_t minimun_cx_interval, uint16_t maximum_cx_int
  *  The Timing parameters as stored as the GAP Preferred Peripheral Connection Parameters.
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_change_timing_GAP_PPCP(void);
+boolean lib_aci_change_timing_GAP_PPCP(void);
 
 /** @brief Sends acknowledgement message to peer.
  *  @details This function sends @c SendDataAck command to radio. The radio is expected 
@@ -403,7 +403,7 @@ bool lib_aci_change_timing_GAP_PPCP(void);
  *  @param pipe Pipe number for which the acknowledgement is to be sent.
  *  @return True if the ack was sent successfully. False otherwise.
 */
-bool lib_aci_send_ack(aci_state_t *aci_stat, const uint8_t pipe);
+boolean lib_aci_send_ack(aci_state_t *aci_stat, const uint8_t pipe);
 
 /** @brief Sends negative acknowledgement message to peer.
  *  @details This function sends @c SendDataNack command to radio. The radio is expected 
@@ -412,7 +412,7 @@ bool lib_aci_send_ack(aci_state_t *aci_stat, const uint8_t pipe);
  *  @param error_code Error code to be sent in the NACk.
  *  @return True if the nack was sent successfully. False otherwise.
 */
-bool lib_aci_send_nack(aci_state_t *aci_stat, const uint8_t pipe, const uint8_t error_code);
+boolean lib_aci_send_nack(aci_state_t *aci_stat, const uint8_t pipe, const uint8_t error_code);
 
 /** @brief Sends ReadDynamicData command to the host. 
  *  @details This function sends @c ReadDynamicData command to host. The host is expected 
@@ -424,7 +424,7 @@ bool lib_aci_send_nack(aci_state_t *aci_stat, const uint8_t pipe, const uint8_t 
  *  and later chose to write it back using the function lib_aci_write_dynamic_data.
  *  @return True if the command was sent successfully through the ACI. False otherwise.
 */
-bool lib_aci_read_dynamic_data(void);
+boolean lib_aci_read_dynamic_data(void);
 
 /** @brief Sends WriteDynamicData command to the host.
  *  @details This function sends @c WriteDynamicData command to host. The host is expected
@@ -439,7 +439,7 @@ bool lib_aci_read_dynamic_data(void);
  *  @param length Length of the dynamic data.
  *  @return True if the command was sent successfully through the ACI. False otherwise.
 */
-bool lib_aci_write_dynamic_data(uint8_t sequence_number, uint8_t* dynamic_data, uint8_t length);
+boolean lib_aci_write_dynamic_data(uint8_t sequence_number, uint8_t* dynamic_data, uint8_t length);
 //@}
 
 /** @name ACI commands available while connected in Bond mode */
@@ -451,7 +451,7 @@ bool lib_aci_write_dynamic_data(uint8_t sequence_number, uint8_t* dynamic_data, 
  *  master rejects with a pairing failed or if the bond timer expires the connection is closed. 
  *  @return True if the transaction is successfully initiated.
  */
-bool lib_aci_bond_request(void);
+boolean lib_aci_bond_request(void);
 
 /** @brief Set the key requested by the 8001. 
  *  @details This function sends an @c SetKey command to the radio. 
@@ -460,7 +460,7 @@ bool lib_aci_bond_request(void);
  *  @param len Length of the key.
  *  @return True if the transaction is successfully initiated.
 */
-bool lib_aci_set_key(aci_key_type_t key_rsp_type, uint8_t *key, uint8_t len);
+boolean lib_aci_set_key(aci_key_type_t key_rsp_type, uint8_t *key, uint8_t len);
 
 //@}
 
@@ -476,7 +476,7 @@ bool lib_aci_set_key(aci_key_type_t key_rsp_type, uint8_t *key, uint8_t len);
  *  @param message_data Pointer to the data to send.
  *  @return True if the transaction is successfully initiated.
 */
-bool lib_aci_echo_msg(uint8_t message_size, uint8_t *message_data);
+boolean lib_aci_echo_msg(uint8_t message_size, uint8_t *message_data);
 
 /** @brief Sends an DTM command
  *  @details This function sends an @c DTM command to the radio. 
@@ -484,7 +484,7 @@ bool lib_aci_echo_msg(uint8_t message_size, uint8_t *message_data);
  *  @param dtm_command_lsbyte Least significant byte of the DTM command.
  *  @return True if the transaction is successfully initiated.
 */
-bool lib_aci_dtm_command(uint8_t dtm_command_msbyte, uint8_t dtm_command_lsbyte);
+boolean lib_aci_dtm_command(uint8_t dtm_command_msbyte, uint8_t dtm_command_lsbyte);
 
 /** @brief Gets an ACI event from the ACI Event Queue
  *  @details This function gets an ACI event from the ACI event queue. 
@@ -493,7 +493,7 @@ bool lib_aci_dtm_command(uint8_t dtm_command_msbyte, uint8_t dtm_command_lsbyte)
  *  @param p_aci_data pointer to the ACI Event. The ACI Event received will be copied into this pointer.
  *  @return True if an ACI Event was copied to the pointer.
 */
-bool lib_aci_event_get(aci_state_t *aci_stat, hal_aci_evt_t * aci_evt);
+boolean lib_aci_event_get(aci_state_t *aci_stat, hal_aci_evt_t * aci_evt);
 
 /** @brief Flushes the events in the ACI command queues and ACI Event queue
  *
