@@ -252,14 +252,11 @@ void aci_loop()
 		        		Serial.println(F("SAMPLING_RATE: "));
 		        		printData(aci_evt);
 						
-						uint32_t value32;
-
 						// 4 Bytes
  						// big-endian !!!!
-						value32 = aci_evt->params.data_received.rx_data.aci_data[3] + ((uint32_t)aci_evt->params.data_received.rx_data.aci_data[2] << 8) 
-						+ ((uint32_t)aci_evt->params.data_received.rx_data.aci_data[1] << 16) + ((uint32_t)aci_evt->params.data_received.rx_data.aci_data[0] << 24) ;
-						Serial.print(F("Value: "));
-		        		Serial.println(value32);
+						value = aci_evt->params.data_received.rx_data.aci_data[1] + ((uint16_t)aci_evt->params.data_received.rx_data.aci_data[0] << 8);
+		        		Serial.print(F("Value: "));
+		        		Serial.println(value);
 		        		break;
 		        	default:
 		        		printData(aci_evt);
