@@ -225,36 +225,41 @@ void aci_loop()
 		        Serial.print(F("Pipe #: 0x"));
 		        Serial.println(aci_evt->params.data_received.rx_data.pipe_number, HEX);
 		        
+				uint16_t value;
 		        switch(aci_evt->params.data_received.rx_data.pipe_number) {
 		        	case PIPE_CONNECTIONCONTROL_CONNECTIONINTERVAL_RX_ACK_AUTO:
 		        		Serial.println(F("CONNECTION_INTERVAL: "));
 		        		
 		        		printData(aci_evt);
 
-		        		int x;
-
-		        		uint8_t value_array[aci_evt->len - 2];
-		        		uint16_t value;
-
-						for(x = 0; x < aci_evt->len - 2; x++)
-						{
-							value_array[x] = aci_evt->params.data_received.rx_data.aci_data[x];
-							Serial.print(value_array[x], BIN);
-							Serial.print(" ");
-						}
-						Serial.println("");
-
-						value = value_array[1] + ((uint16_t)value_array[0] << 8);
-		        		Serial.print(F("Value in decimal: "));
-		        		Serial.println(value, BIN);
-		        		Serial.println(value, DEC);
+		        		// Two bytes
+ 						// big-endian !!!!
+						value = aci_evt->params.data_received.rx_data.aci_data[1] + ((uint16_t)aci_evt->params.data_received.rx_data.aci_data[0] << 8);
+		        		Serial.print(F("Value: "));
+		        		Serial.println(value);
 		        		break;
 		        	case PIPE_CONNECTIONCONTROL_SLAVELATENCY_RX_ACK_AUTO:
 		        		Serial.println(F("SLAVELATENCY: "));
+		        		printData(aci_evt);
+
+		        		// One byte
+ 						// big-endian !!!!
+						value = aci_evt->params.data_received.rx_data.aci_data[1];
+						Serial.print(F("Value: "));
+		        		Serial.println(value);
 		        		break;	
 		        	case PIPE_CONNECTIONCONTROL_SAMPLINGRATE_RX_ACK_AUTO:
 		        		Serial.println(F("SAMPLING_RATE: "));
 		        		printData(aci_evt);
+						
+						uint32_t value32;
+
+						// 4 Bytes
+ 						// big-endian !!!!
+						value32 = aci_evt->params.data_received.rx_data.aci_data[3] + ((uint32_t)aci_evt->params.data_received.rx_data.aci_data[2] << 8) 
+						+ ((uint32_t)aci_evt->params.data_received.rx_data.aci_data[1] << 16) + ((uint32_t)aci_evt->params.data_received.rx_data.aci_data[0] << 24) ;
+						Serial.print(F("Value: "));
+		        		Serial.println(value32);
 		        		break;
 		        	default:
 		        		printData(aci_evt);
