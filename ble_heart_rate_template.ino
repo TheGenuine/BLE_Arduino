@@ -43,11 +43,23 @@ static hal_aci_data_t aci_cmd;
 static bool radio_ack_pending  = false;
 static bool timing_change_done = false;
 static bool timing_high = false;
+static bool timing_resp = true;
 static uint8_t current_heart_rate_data[HR_MAX_PAYLOAD];
 
 const int analogInPin = I0; 
 
 int sensorValue = 200;
+
+void printData(aci_evt_t * aci_evt) {
+	int i = 0;
+	Serial.print(F("Data(HEX) : "));
+	for(i = 0; i < aci_evt->len - 2; i++)
+	{
+		Serial.print(aci_evt->params.data_received.rx_data.aci_data[i], HEX);
+		Serial.print(F(" "));
+	}
+	Serial.println(F(""));
+}
 
 void setup(void)
 { 
@@ -98,18 +110,18 @@ void aci_loop()
 						When the device is in the setup mode
 						*/
 						aci_state.device_state = ACI_DEVICE_SETUP;
-						Serial.println("Evt Device Started: Setup");
+						Serial.println(F("Evt Device Started: Setup"));
 						if (ACI_STATUS_TRANSACTION_COMPLETE != do_aci_setup(&aci_state))
 						{
-							Serial.println("Error in ACI Setup");
+							Serial.println(F("Error in ACI Setup"));
 						}
 						break;
 						
 						case ACI_DEVICE_STANDBY:
 							aci_state.device_state = ACI_DEVICE_STANDBY;
-							Serial.println("Evt Device Started: Standby");
+							Serial.println(F("Evt Device Started: Standby"));
 							lib_aci_connect(180/* in seconds */, 0x0100 /* advertising interval 100ms*/);
-							Serial.println("Advertising started for 180s");
+							Serial.println(F("Advertising started for 180s"));
 							break;
 					}
 				}
@@ -123,17 +135,34 @@ void aci_loop()
 					//TRANSACTION_CONTINUE and TRANSACTION_COMPLETE
 					//all other ACI commands will have status code of ACI_STATUS_SCUCCESS for a successful command         
 
-					Serial.print("ACI Status of ACI Evt Cmd Rsp 0x");
+					Serial.print(F("ACI Status of ACI Evt Cmd Rsp 0x"));
 					Serial.println(aci_evt->params.cmd_rsp.cmd_status, HEX);           
-					Serial.print("ACI Command 0x");
-					Serial.println(aci_evt->params.cmd_rsp.cmd_opcode, HEX);          
-					Serial.println("Evt Cmd respone: Error. Arduino is in an while(1); loop");
-					while (1);
-				}        
+					Serial.print(F("ACI Command 0x"));
+					Serial.println(aci_evt->params.cmd_rsp.cmd_opcode, HEX);   
+					if(aci_evt->params.cmd_rsp.cmd_opcode == ACI_CMD_CHANGE_TIMING) {
+						switch(aci_evt->params.cmd_rsp.cmd_status) {
+							case ACI_STATUS_ERROR_REJECTED:
+							case ACI_STATUS_ERROR_BUSY:
+								break;
+							case ACI_STATUS_ERROR_INVALID_PARAMETER:
+							case ACI_STATUS_ERROR_INVALID_LENGTH:
+							case ACI_STATUS_ERROR_INVALID_DATA:
+								timing_change_done = true;
+								break;
+						}
+					}       
+				}  else {
+					Serial.println(F("ACI Status SUCCESSFUL"));
+					Serial.print(F("ACI Status of ACI Evt Cmd Rsp 0x"));
+					Serial.println(aci_evt->params.cmd_rsp.cmd_status, HEX);           
+					Serial.print(F("ACI Command 0x"));
+					Serial.println(aci_evt->params.cmd_rsp.cmd_opcode, HEX);  
+					timing_change_done = true;
+				}     
 				break;
 				
 			case ACI_EVT_PIPE_STATUS:
-				Serial.println("Evt Pipe Status");
+				Serial.println(F("Evt Pipe Status"));
 				/** check if the peer has subscribed to the Heart Rate Measurement Characteristic for Notifications
 				*/
 				if (lib_aci_is_pipe_available(&aci_state, PIPE_HEART_RATE_HEART_RATE_MEASUREMENT_TX) 
@@ -152,24 +181,24 @@ void aci_loop()
 				/*
 				Link timing has changed.
 				*/
-				Serial.println("Timing changed");
+				Serial.print(F("Timing changed -> 0x"));
 				Serial.println(aci_evt->params.timing.conn_rf_interval, HEX);
 				
-				Serial.print("Connection interval: ");
-				Serial.println(aci_state.connection_interval);
+				Serial.print(F("Connection interval: "));
+				Serial.println(aci_state.connection_interval * 1.25);
 
-				Serial.print("slave_latency: ");
+				Serial.print(F("Slave_latency: "));
 				Serial.println(aci_state.slave_latency);
 				break;
 				
 			case ACI_EVT_CONNECTED:
 				radio_ack_pending  = false;
 				timing_change_done = false;
-				Serial.println("Evt Connected");
-				Serial.print("Connection interval: ");
+				Serial.println(F("Evt Connected"));
+				Serial.print(F("Connection interval: "));
 				Serial.println(aci_state.connection_interval);
 
-				Serial.print("slave_latency: ");
+				Serial.print(F("slave_latency: "));
 				Serial.println(aci_state.slave_latency);
 				break;
 				
@@ -192,29 +221,44 @@ void aci_loop()
 				radio_ack_pending = false;
 				break;
 	 	    case ACI_EVT_DATA_RECEIVED:
-		        Serial.print(F("DATA RECEIVED"));
+		        Serial.println(F("DATA RECEIVED"));
 		        Serial.print(F("Pipe #: 0x"));
 		        Serial.println(aci_evt->params.data_received.rx_data.pipe_number, HEX);
-		        {
-		          int i=0;
-		          Serial.print(F(" Data(HEX) : "));
-		          for(i=0; i<aci_evt->len - 2; i++)
-		          {
-		            Serial.print(aci_evt->params.data_received.rx_data.aci_data[i], HEX);
-		            Serial.print(F(" "));
-		          }
-		        }
-		        Serial.println(F(""));
-		        lib_aci_send_ack(&aci_state, aci_evt->params.data_received.rx_data.pipe_number);
-		        Serial.println(F("Setting connection parameter"));
-		        if(timing_high) {
-			        lib_aci_change_timing(1250, 1250, 2, 600);
-					timing_high = false;
-		        } else {
-			        lib_aci_change_timing(625, 625, 0, 100);
-			        timing_high = true;
-		        }
+		        
+		        switch(aci_evt->params.data_received.rx_data.pipe_number) {
+		        	case PIPE_CONNECTIONCONTROL_CONNECTIONINTERVAL_RX_ACK_AUTO:
+		        		Serial.println(F("CONNECTION_INTERVAL: "));
+		        		
+		        		printData(aci_evt);
 
+		        		int x;
+
+		        		uint8_t value_array[aci_evt->len - 2];
+		        		uint16_t value;
+
+						for(x = 0; x < aci_evt->len - 2; x++)
+						{
+							value_array[x] = aci_evt->params.data_received.rx_data.aci_data[x];
+							Serial.print(value_array[x], BIN);
+							Serial.print(" ");
+						}
+						Serial.println("");
+
+						value = value_array[1] + ((uint16_t)value_array[0] << 8);
+		        		Serial.print(F("Value in decimal: "));
+		        		Serial.println(value, BIN);
+		        		Serial.println(value, DEC);
+		        		break;
+		        	case PIPE_CONNECTIONCONTROL_SLAVELATENCY_RX_ACK_AUTO:
+		        		Serial.println(F("SLAVELATENCY: "));
+		        		break;	
+		        	case PIPE_CONNECTIONCONTROL_SAMPLINGRATE_RX_ACK_AUTO:
+		        		Serial.println(F("SAMPLING_RATE: "));
+		        		printData(aci_evt);
+		        		break;
+		        	default:
+		        		printData(aci_evt);
+		        }
 		        break; 
 			 case ACI_EVT_DISCONNECTED:       
 				/**
@@ -222,18 +266,18 @@ void aci_loop()
 				*/
 				if(ACI_STATUS_ERROR_ADVT_TIMEOUT == aci_evt->params.disconnected.aci_status)
 				{
-					Serial.println("Evt Disconnected -> Advertising timed out");          
+					Serial.println(F("Evt Disconnected -> Advertising timed out"));
 					{
-						Serial.println("nRF8001 going to sleep");
+						Serial.println(F("nRF8001 going to sleep"));
 						lib_aci_sleep();
 						aci_state.device_state = ACI_DEVICE_SLEEP;
 					}
 				}
 				else
 				{          
-					Serial.println("Evt Disconnected -> Link lost.");
+					Serial.println(F("Evt Disconnected -> Link lost."));
 					lib_aci_connect(180/* in seconds */, 0x0050 /* advertising interval 50ms*/);
-					Serial.println("Advertising started for 180s");
+					Serial.println(F("Advertising started for 180s"));
 				}
 				break;
 			 
@@ -292,11 +336,11 @@ void sendData() {
 		current_heart_rate_data[data_index] = buffer_pop();
 		data_index++;
 	}
-	Serial.print("Data Index - ");
+	Serial.print(F("Data Index - "));
 	Serial.println(data_index);
 	boolean success = lib_aci_send_data(PIPE_HEART_RATE_HEART_RATE_MEASUREMENT_TX, (uint8_t *)&current_heart_rate_data[0] ,data_index);
 	
-	Serial.print("Send Data - ");
+	Serial.print(F("Send Data - "));
 	Serial.println(success);
 	if(success) {
 		radio_ack_pending = true;
@@ -306,30 +350,49 @@ void sendData() {
 void loop()
 {
 	// sensorValue = analogRead(analogInPin);
-	sensorValue++;
+	// sensorValue++;
 
-	int push = buffer_push(sensorValue);
+	// Serial.println(sensorValue);
+	// if(sensorValue > 215 && timing_change_done == true) {
+	// 	Serial.println(F("Setting connection parameter"));
+	// 	if(timing_high) {
+			
+	// 		Serial.println(F("HIGH"));
+	// 	    timing_resp = lib_aci_change_timing((uint16_t) 2560, (uint16_t) 2560, (uint16_t) 2, (uint16_t) 200);
+	// 		timing_high = false;
+	// 		timing_change_done = false;
+	// 	} else {
+	// 		Serial.println(F("LOW"));
+	// 	    timing_resp = lib_aci_change_timing((uint16_t) 900, (uint16_t) 900, (uint16_t) 0, (uint16_t) 200);
+	// 	    timing_high = true;
+	// 		timing_change_done = false;
+	// 	}
+	// 	Serial.print(F("Resp: "));
+	// 	Serial.println(timing_resp);
+	// 	sensorValue = 200;
+	// }
+	// int push = buffer_push(sensorValue);
 
-	if(push == 1) {
-		Serial.print(sensorValue);
-		Serial.print(" @ ");
-		Serial.println(buffer_size());
-	} else {
-		Serial.println(F("Data buffering failed!"));
-	}
+	// if(push == 1) {
+		// Serial.print(sensorValue);
+	// 	Serial.print(" @ ");
+	// 	Serial.println(buffer_size());
+	// } else {
+	// 	Serial.println(F("Data buffering failed!"));
+	// }
 
-	analyseData();
+	// analyseData();
 
 	aci_loop();
 	
-	if (isChannelOpen())
-	{
-		Serial.println("Channel open");
-		handleCommands();
-		if(checkTransmissionCriteria()) {
-			sendData();
-		}
-	}
+	// if (isChannelOpen())
+	// {
+	// 	Serial.println("Channel open");
+	// 	handleCommands();
+	// 	if(checkTransmissionCriteria()) {
+	// 		sendData();
+	// 	}
+	// }
 
 	delay(1000);
 }
