@@ -49,6 +49,8 @@ static uint8_t current_heart_rate_data[HR_MAX_PAYLOAD];
 const int analogInPin = I0; 
 
 int sensorValue = 200;
+int buffer_limit = 19;
+int sleep_time = 1000;
 
 void printData(aci_evt_t * aci_evt) {
 	int i = 0;
@@ -229,8 +231,7 @@ void aci_loop()
 		        switch(aci_evt->params.data_received.rx_data.pipe_number) {
 		        	case PIPE_CONNECTIONCONTROL_CONNECTIONINTERVAL_RX_ACK_AUTO:
 		        		Serial.println(F("CONNECTION_INTERVAL: "));
-		        		
-		        		printData(aci_evt);
+		        		// printData(aci_evt);
 
 		        		// Two bytes
  						// big-endian !!!!
@@ -240,7 +241,7 @@ void aci_loop()
 		        		break;
 		        	case PIPE_CONNECTIONCONTROL_SLAVELATENCY_RX_ACK_AUTO:
 		        		Serial.println(F("SLAVELATENCY: "));
-		        		printData(aci_evt);
+		        		// printData(aci_evt);
 
 		        		// One byte
  						// big-endian !!!!
@@ -250,7 +251,7 @@ void aci_loop()
 		        		break;	
 		        	case PIPE_CONNECTIONCONTROL_SAMPLINGRATE_RX_ACK_AUTO:
 		        		Serial.println(F("SAMPLING_RATE: "));
-		        		printData(aci_evt);
+		        		// printData(aci_evt);
 						
 						// 4 Bytes
  						// big-endian !!!!
@@ -305,7 +306,7 @@ void hook_for_resetting_energy_expended(void)
 
 
 boolean isBufferFull() {
-	return buffer_size() > 19;
+	return buffer_size() > buffer_limit;
 }
 
 boolean checkTransmissionCriteria() {
@@ -319,8 +320,12 @@ boolean isChannelOpen() {
 void handleCommands() {
 }
 
-void analyseData() {
-
+void analyseData(int sensorValue) {
+	if(sensorValue > 800 | sensorValue < 0) {
+		Serial.println("Critical value detected, increasing transmission frequency");
+		buffer_limit = 10;
+		sleep_time = 200;
+	}
 }
 
 void sendData() {
@@ -351,7 +356,7 @@ void sendData() {
 
 void loop()
 {
-	// sensorValue = analogRead(analogInPin);
+	sensorValue = analogRead(analogInPin);
 	// sensorValue++;
 
 	// Serial.println(sensorValue);
@@ -373,29 +378,29 @@ void loop()
 	// 	Serial.println(timing_resp);
 	// 	sensorValue = 200;
 	// }
-	// int push = buffer_push(sensorValue);
+	int push = buffer_push(sensorValue);
 
-	// if(push == 1) {
-		// Serial.print(sensorValue);
-	// 	Serial.print(" @ ");
-	// 	Serial.println(buffer_size());
-	// } else {
-	// 	Serial.println(F("Data buffering failed!"));
-	// }
+	if(push == 1) {
+		Serial.print(sensorValue);
+		Serial.print(" @ ");
+		Serial.println(buffer_size());
+	} else {
+		Serial.println(F("Data buffering failed!"));
+	}
 
-	// analyseData();
+	analyseData(sensorValue);
 
 	aci_loop();
 	
-	// if (isChannelOpen())
-	// {
-	// 	Serial.println("Channel open");
-	// 	handleCommands();
-	// 	if(checkTransmissionCriteria()) {
-	// 		sendData();
-	// 	}
-	// }
+	if (isChannelOpen())
+	{
+		Serial.println("Channel open");
+		handleCommands();
+		if(checkTransmissionCriteria()) {
+			sendData();
+		}
+	}
 
-	delay(1000);
+	delay(sleep_time);
 }
 
