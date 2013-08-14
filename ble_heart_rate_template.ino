@@ -48,9 +48,13 @@ static uint8_t current_heart_rate_data[HR_MAX_PAYLOAD];
 
 const int analogInPin = I0; 
 
+uint16_t connection_interval = 798;
+uint16_t slave_latency = 0;
+uint16_t sampling_rate = 1;
+
 int sensorValue = 200;
 int buffer_limit = 19;
-int sleep_time = 1000;
+unsigned long sleep_time = 1000000;
 
 void printData(aci_evt_t * aci_evt) {
 	int i = 0;
@@ -89,6 +93,17 @@ void setup(void)
 	lib_aci_init(&aci_state);
 	heart_rate_init();
 	buffer_init();
+	Serial.println(F("----- Setup -----"));
+	Serial.print(F("Connection Interval: "));
+	Serial.println(connection_interval);
+	Serial.print(F("Slave Latency: "));
+	Serial.println(slave_latency);
+	Serial.print(F("Buffer Limit: "));
+	Serial.println(buffer_limit);
+	Serial.print(F("Sleeping Time : "));
+	Serial.println(sleep_time);
+	Serial.println(F("----------------"));
+
 }
 
 void aci_loop()
@@ -224,40 +239,62 @@ void aci_loop()
 				break;
 	 	    case ACI_EVT_DATA_RECEIVED:
 		        Serial.println(F("DATA RECEIVED"));
-		        Serial.print(F("Pipe #: 0x"));
-		        Serial.println(aci_evt->params.data_received.rx_data.pipe_number, HEX);
+		        // Serial.print(F("Pipe #: 0x"));
+		        // Serial.println(aci_evt->params.data_received.rx_data.pipe_number, HEX);
 		        
 				uint16_t value;
 		        switch(aci_evt->params.data_received.rx_data.pipe_number) {
 		        	case PIPE_CONNECTIONCONTROL_CONNECTIONINTERVAL_RX_ACK_AUTO:
-		        		Serial.println(F("CONNECTION_INTERVAL: "));
+		        		Serial.print(F("CONNECTION_INTERVAL: "));
 		        		// printData(aci_evt);
 
 		        		// Two bytes
  						// big-endian !!!!
 						value = aci_evt->params.data_received.rx_data.aci_data[1] + ((uint16_t)aci_evt->params.data_received.rx_data.aci_data[0] << 8);
-		        		Serial.print(F("Value: "));
+						connection_interval = value;
 		        		Serial.println(value);
 		        		break;
 		        	case PIPE_CONNECTIONCONTROL_SLAVELATENCY_RX_ACK_AUTO:
-		        		Serial.println(F("SLAVELATENCY: "));
+		        		Serial.print(F("SLAVELATENCY: "));
 		        		// printData(aci_evt);
 
 		        		// One byte
  						// big-endian !!!!
-						value = aci_evt->params.data_received.rx_data.aci_data[1];
-						Serial.print(F("Value: "));
+						value = aci_evt->params.data_received.rx_data.aci_data[0];
+						slave_latency = value;
 		        		Serial.println(value);
 		        		break;	
 		        	case PIPE_CONNECTIONCONTROL_SAMPLINGRATE_RX_ACK_AUTO:
-		        		Serial.println(F("SAMPLING_RATE: "));
+		        		Serial.print(F("SAMPLING_RATE: "));
 		        		// printData(aci_evt);
 						
 						// 4 Bytes
  						// big-endian !!!!
-						value = aci_evt->params.data_received.rx_data.aci_data[1] + ((uint16_t)aci_evt->params.data_received.rx_data.aci_data[0] << 8);
-		        		Serial.print(F("Value: "));
+ 						if(aci_evt->len - 2 > 1) {
+							value = aci_evt->params.data_received.rx_data.aci_data[1] + ((uint16_t)aci_evt->params.data_received.rx_data.aci_data[0] << 8);
+ 						} else {
+							value = aci_evt->params.data_received.rx_data.aci_data[0];
+ 						}
+						sampling_rate = value;
 		        		Serial.println(value);
+
+						Serial.print(F("SLEEPING_TIME: "));
+						sleep_time = ((1/ (double) sampling_rate) * 1000000);
+		        		Serial.println(sleep_time);
+		        		break;
+		        	case PIPE_CONNECTIONCONTROL_BUFFERLIMIT_RX_ACK_AUTO:
+						Serial.print(F("BUFFER_LIMIT: "));
+		        		// printData(aci_evt);
+						
+						// 1 Byte
+ 						// big-endian !!!!
+						value = aci_evt->params.data_received.rx_data.aci_data[0];
+						if(value > 0) {
+							buffer_limit = value;
+		        			Serial.println(value);
+						} else {
+							Serial.println(F("<invalid>"));
+						}
 		        		break;
 		        	default:
 		        		printData(aci_evt);
@@ -394,13 +431,15 @@ void loop()
 	
 	if (isChannelOpen())
 	{
-		Serial.println("Channel open");
 		handleCommands();
 		if(checkTransmissionCriteria()) {
 			sendData();
 		}
 	}
-
-	delay(sleep_time);
+	if(sleep_time < 16383) {
+		delayMicroseconds(sleep_time);
+	} else {
+		delay(sleep_time / 1000);
+	}
 }
 
