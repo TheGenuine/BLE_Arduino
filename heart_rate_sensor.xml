@@ -177,6 +177,31 @@
                 <Notify>60000</Notify>
             </PeriodForProperties>
         </Characteristic>
+        <Characteristic>
+            <Name>BufferLimit</Name>
+            <Uuid>1115</Uuid>
+            <DefaultValue>1</DefaultValue>
+            <UsePresentationFormat>1</UsePresentationFormat>
+            <UserDescription></UserDescription>
+            <MaxDataLength>1</MaxDataLength>
+            <AttributeLenType>1</AttributeLenType>
+            <ForceOpen>false</ForceOpen>
+            <Properties>
+                <WriteWithoutResponse>false</WriteWithoutResponse>
+                <Write>true</Write>
+                <Notify>true</Notify>
+                <Indicate>false</Indicate>
+                <Broadcast>false</Broadcast>
+            </Properties>
+            <SetPipe>false</SetPipe>
+            <AckIsAuto>true</AckIsAuto>
+            <PresentationFormatDescriptor Value="0000" Exponent="0" Format="4" NameSpace="01" Unit="0000"/>
+            <PeriodForReadingThisCharacteristic>60000</PeriodForReadingThisCharacteristic>
+            <PeriodForProperties>
+                <Read>60000</Read>
+                <Notify>60000</Notify>
+            </PeriodForProperties>
+        </Characteristic>
     </Service>
     <Gapsettings>
         <Name>TCD BLE Mote</Name>
