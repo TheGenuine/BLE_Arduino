@@ -359,9 +359,11 @@ void handleCommands() {
 
 void analyseData(int sensorValue) {
 	if(sensorValue > 800 | sensorValue < 0) {
-		Serial.println("Critical value detected, increasing transmission frequency");
-		buffer_limit = 10;
-		sleep_time = 200;
+		if(sleep_time > 200) {
+			Serial.println("Critical value detected, increasing transmission frequency");
+			buffer_limit = 2;
+			sleep_time = 200;
+		}
 	}
 }
 
