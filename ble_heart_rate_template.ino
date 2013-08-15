@@ -42,8 +42,7 @@ static hal_aci_data_t aci_cmd;
 
 static bool radio_ack_pending  = false;
 static bool timing_change_done = false;
-static bool timing_high = false;
-static bool timing_resp = true;
+static bool timing_done = true;
 static uint8_t current_heart_rate_data[HR_MAX_PAYLOAD];
 
 const int analogInPin = I0; 
@@ -157,14 +156,22 @@ void aci_loop()
 					Serial.print(F("ACI Command 0x"));
 					Serial.println(aci_evt->params.cmd_rsp.cmd_opcode, HEX);   
 					if(aci_evt->params.cmd_rsp.cmd_opcode == ACI_CMD_CHANGE_TIMING) {
+						timing_change_done = true;
 						switch(aci_evt->params.cmd_rsp.cmd_status) {
 							case ACI_STATUS_ERROR_REJECTED:
+								Serial.println(F("ACI_STATUS_ERROR_REJECTED"));
+								break;
 							case ACI_STATUS_ERROR_BUSY:
+								Serial.println(F("ACI_STATUS_ERROR_BUSY"));
 								break;
 							case ACI_STATUS_ERROR_INVALID_PARAMETER:
+								Serial.println(F("ACI_STATUS_ERROR_INVALID_PARAMETER"));
+								break;
 							case ACI_STATUS_ERROR_INVALID_LENGTH:
+								Serial.println(F("ACI_STATUS_ERROR_INVALID_LENGTH"));
+								break;
 							case ACI_STATUS_ERROR_INVALID_DATA:
-								timing_change_done = true;
+								Serial.println(F("ACI_STATUS_ERROR_INVALID_DATA"));
 								break;
 						}
 					}       
@@ -263,6 +270,12 @@ void aci_loop()
 						value = aci_evt->params.data_received.rx_data.aci_data[0];
 						slave_latency = value;
 		        		Serial.println(value);
+
+						if(timing_done) {
+			        		Serial.println(F("Changing connection"));
+			        		timing_done = false;
+			        		lib_aci_change_timing(connection_interval, connection_interval, slave_latency, (uint16_t) 200);
+						}
 		        		break;	
 		        	case PIPE_CONNECTIONCONTROL_SAMPLINGRATE_RX_ACK_AUTO:
 		        		Serial.print(F("SAMPLING_RATE: "));
